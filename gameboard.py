@@ -3,9 +3,11 @@ from tkinter import messagebox
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, pc, mv):
         self.user_name = self.getName()
-        self.player = 'X'  # next_player to move
+        self.other_player = ""
+        self.player_char = pc  # next_player to move
+        self.turn = mv
         self.games_played = 0
         self.ties_count = 0
         self.wins = 0
@@ -20,14 +22,13 @@ class Game:
                 self.b[i].append(self.button(self.root))
                 self.b[i][j].config(command=lambda row=i, col=j: self.click(row, col))
                 self.b[i][j].grid(row=i, column=j)
-        self.label = Label(text=self.player + "'s Chance", font=('arial', 20, 'bold'))
+        self.label = Label(text=self.user_name + "'s Chance", font=('arial', 20, 'bold'))
         self.label.grid(row=3, column=0, columnspan=3)
         self.close = Button(self.root, text="Quit", command=self.close_window, font=('arial', 20, 'bold'), bg="Blue")
         self.close.grid(row=4, column=0, columnspan=3)
 
     def getName(self):
-        name = input("Enter Name: ")
-        return name
+        return input("Name:")
 
     @staticmethod
     def button(frame):  # Function to define a button
@@ -35,58 +36,70 @@ class Game:
                    bd=10)
         return b
 
-    def change_a(self):  # Function to change the operand for the next player
-        for i in ['O', 'X']:
-            if not (i == self.player):
-                self.player = i
-                break
-
     def updateGamesPlayed(self):
-        # TODO
+        self.games_played += 1
         pass
 
     def resetGameBoard(self):  # Resets the game
         for i in range(3):
             for j in range(3):
-                self.b[i][j]["text"] = " "
+                self.b[i][j]["text"] = ""
                 self.b[i][j]["state"] = NORMAL
-        self.player = 'X'
+        self.turn = self.turn
 
     def isWinner(self):
-        # TODO
-        pass
+        # horizontal
+        rows = [0] * 3
+        cols = [0] * 3
+        for i in range(3):
+            for j in range(3):
+                if self.b[i][j]["text"] == self.player_char:
+                    rows[i] += 1
+                    cols[j] += 1
+        if max(rows + cols) == 3:
+            return True
+        ldiag = 0
+        rdiag = 0
+        for i in range(3):
+            if self.b[i][i]["text"] == self.player_char:
+                ldiag += 1
+            if self.b[i][3-1-i]["text"] == self.player_char:
+                rdiag += 1
+        return max(ldiag, rdiag) >= 3
 
     def enableAll(self):
-        # TODO
-        pass
+        for i in range(3):
+            for j in range(3):
+                if self.b[i][j]["text"] == "":
+                    self.b[i][j]["state"] = NORMAL
 
     def disableAll(self):
-        # TODO
-        pass
+        for i in range(3):
+            for j in range(3):
+                self.b[i][j]["state"] = DISABLED
 
     def boardIsFull(self):
-        # TODO
-        pass
+        cnt = 0
+        for i in range(3):
+            for j in range(3):
+                if self.b[i][j]["text"] == '':
+                    cnt += 1
+        return cnt == 9
 
     def printStatus(self):
-        # TODO
         pass
 
     def click(self, row, col):
-        self.b[row][col].config(text=self.player, state=DISABLED, disabledforeground=self.colour[self.player])
-
-        self.change_a()
-        self.label.config(text=self.player + "'s Chance")
+        self.b[row][col].config(text=self.player_char, state=DISABLED, disabledforeground=self.colour[self.player_char])
+        self.label.config(text=self.user_name + "'s Chance")
 
     def close_window(self):
         self.root.destroy()
-
-
 
     def play(self):
         self.root.mainloop()
 
 
 if __name__ == "__main__":
-    cc = Game()
+    cc = Game("X", True)
     cc.play()
