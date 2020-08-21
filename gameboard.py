@@ -3,11 +3,12 @@ from tkinter import messagebox, simpledialog
 
 
 class Game:
-    def __init__(self, pc, mv):
-        self.user_name = self.getName()
+    def __init__(self, pc):
+        self.user_name = ""
+        while self.user_name == "":
+            self.user_name = self.getName().strip()
         self.other_player = ""
         self.player_char = pc  # next_player to move
-        self.turn = mv
         self.games_played = 0
         self.ties_count = 0
         self.wins = 0
@@ -22,7 +23,7 @@ class Game:
                 self.b[i].append(self.button(self.root))
                 self.b[i][j].config(command=lambda row=i, col=j: self.click(row, col))
                 self.b[i][j].grid(row=i, column=j)
-        self.label = Label(text=self.user_name + "'s Chance", font=('arial', 20, 'bold'))
+        self.label = Label(text="Chance", font=('arial', 20, 'bold'))
         self.label.grid(row=3, column=0, columnspan=3)
         self.close = Button(self.root, text="Quit", command=self.close_window, font=('arial', 20, 'bold'), bg="Blue")
         self.close.grid(row=4, column=0, columnspan=3)
@@ -67,7 +68,6 @@ class Game:
             for j in range(3):
                 self.b[i][j]["text"] = ""
                 self.b[i][j]["state"] = NORMAL
-        self.turn = self.turn
 
     def isWinner(self):
         # horizontal
@@ -90,12 +90,16 @@ class Game:
         return max(ldiag, rdiag) >= 3
 
     def enableAll(self):
+        self.last_player = self.other_player
+        self.label["text"] = f"{self.user_name}'s Turn"
         for i in range(3):
             for j in range(3):
                 if self.b[i][j]["text"] == "":
                     self.b[i][j]["state"] = NORMAL
 
     def disableAll(self):
+        self.label["text"] = f"{self.other_player}'s Turn"
+        self.last_player = self.other_player
         for i in range(3):
             for j in range(3):
                 self.b[i][j]["state"] = DISABLED
@@ -116,7 +120,11 @@ class Game:
 
     def click(self, row, col):
         self.b[row][col].config(text=self.player_char, state=DISABLED, disabledforeground=self.colour[self.player_char])
-        self.label.config(text=self.user_name + "'s Chance")
+        self.disableAll()
+
+    def played(self, row, col, char):
+        self.b[row][col].config(text=char, state=DISABLED, disabledforeground=self.colour[self.char])
+        self.disableAll()
 
     def close_window(self):
         self.root.destroy()
