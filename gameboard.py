@@ -12,7 +12,7 @@ class Game:
         self.ties_count = 0
         self.wins = 0
         self.loss_count = 0
-
+        self.last_player = ""
         self.root = Tk()  # Window defined
         self.root.title("Tic-Tac-Toe")  # Title given
         self.colour = {'O': "deep sky blue", 'X': "lawn green"}
@@ -26,6 +26,8 @@ class Game:
         self.label.grid(row=3, column=0, columnspan=3)
         self.close = Button(self.root, text="Quit", command=self.close_window, font=('arial', 20, 'bold'), bg="Blue")
         self.close.grid(row=4, column=0, columnspan=3)
+        self.stats = Label(self.root, text="Statistics", font=('arial', 20, 'bold'))
+        self.stats.grid(row=0, column=3, rowspan=4, columnspan=4)
 
     def getName(self):
         return input("Name:")
@@ -36,9 +38,14 @@ class Game:
                    bd=10)
         return b
 
-    def updateGamesPlayed(self):
+    def updateGamesPlayed(self, res):
         self.games_played += 1
-        pass
+        if res == "win":
+            self.wins += 1
+        elif res == "loss":
+            self.loss_count += 1
+        elif res == "draw":
+            self.ties_count += 1
 
     def resetGameBoard(self):  # Resets the game
         for i in range(3):
@@ -63,7 +70,7 @@ class Game:
         for i in range(3):
             if self.b[i][i]["text"] == self.player_char:
                 ldiag += 1
-            if self.b[i][3-1-i]["text"] == self.player_char:
+            if self.b[i][3 - 1 - i]["text"] == self.player_char:
                 rdiag += 1
         return max(ldiag, rdiag) >= 3
 
@@ -87,7 +94,10 @@ class Game:
         return cnt == 9
 
     def printStatus(self):
-        pass
+        text="Statistics\n"
+        text += f"Name: {self.user_name}\n Last Player: {self.last_player}\n"
+        text += f"Number of games played: {self.games_played}\nWins: {self.wins}\n"
+        text += f"Number of ties: {self.ties_count}\nNumber of losses: {self.loss_count}"
 
     def click(self, row, col):
         self.b[row][col].config(text=self.player_char, state=DISABLED, disabledforeground=self.colour[self.player_char])
