@@ -2,6 +2,27 @@ from tkinter import *
 from tkinter import messagebox, simpledialog
 
 
+def promptInput(message):
+    res = ""
+
+    root = Tk()
+    label = Label(root, text=message)
+    ipbox = Entry(root)
+
+    def submit():
+        nonlocal res
+        res = ipbox.get()
+        if (res.strip() != ""):
+            root.destroy()
+
+    button = Button(text="Submit", command=submit)
+    label.pack()
+    ipbox.pack()
+    button.pack()
+    root.mainloop()
+    return res
+
+
 class Game:
     def __init__(self, pc):
         self.user_name = ""
