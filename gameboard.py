@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 
 
 class Game:
@@ -30,7 +30,22 @@ class Game:
         self.stats.grid(row=0, column=3, rowspan=4, columnspan=4)
 
     def getName(self):
-        return input("Name:")
+        popup = Tk()
+        lb = Label(popup, text="Enter Name: ")
+        ip = Entry(popup)
+        name = ""
+        lb.pack()
+        ip.pack()
+
+        def submitName():
+            nonlocal name
+            name = ip.get()
+            popup.destroy()
+
+        sb = Button(popup, text="submit", command=submitName)
+        sb.pack()
+        popup.mainloop()
+        return name
 
     @staticmethod
     def button(frame):  # Function to define a button
