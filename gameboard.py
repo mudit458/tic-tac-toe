@@ -30,8 +30,8 @@ class Game:
         self.con = ""
         self.user_name = ""
         while self.user_name == "":
-            # self.user_name = self.getName().strip()
-            self.user_name = "abc"
+            self.user_name = self.getName().strip()
+            # self.user_name = "abc"
         self.myTurn = False
         self.xy = ""
         self.other_player = ""
@@ -87,7 +87,7 @@ class Game:
             self.wins += 1
         elif res == "loss":
             self.loss_count += 1
-        elif res == "tie":
+        elif res == "draw":
             self.ties_count += 1
 
     def resetGameBoard(self):  # Resets the game
@@ -149,6 +149,33 @@ class Game:
         text += f"Number of ties: {self.ties_count}\nNumber of losses: {self.loss_count}"
         self.stats["text"] = text
         self.root.update()
+    def play_again(self):
+        self.root.withdraw()
+        y = promptInput("Do you want to play again?")
+        y = y.lower()
+        if self.myTurn:
+            if y:
+                self.con.send("Play Again".encode('utf-8'))
+            else:
+                self.con.send("Fun Times")
+            response = self.con.recv(2048).decode('utf-8')
+        else:
+            response = self.con.recv(2048).decode('utf-8')
+            if y:
+                self.send("Play Again".encode('utf-8'))
+            else:
+                self.send("Fun Times".encode('utf-8'))
+        self.root.deiconify()
+        if y == 'y' and response == 'Play Again':
+            self.resetGameBoard()
+            return True
+        else:
+            for i in range(3):
+                for j in range(3):
+                    self.b[i][j].config(text = "*", state=DISABLED)
+            self.label["text"] = "Not in play"
+            self.root.update()
+            return False
 
     def click(self, row=-1, col=-1):
         self.xy = str(row) + " " + str(col)
@@ -170,8 +197,7 @@ class Game:
             xy = self.con.recv(2048).decode('utf-8')
             if xy == "quit":
                 print("other Player Quit")
-                self.root.destroy()
-                sys.exit()
+                self.close_window()
             print("other player moved at", xy)
             row, col = map(int, xy.split())
             self.b[row][col].config(text=other)
@@ -185,21 +211,16 @@ class Game:
             else:
                 winner = self.other_player
                 self.updateGamesPlayed('loss')
-            messagebox.Message(message=f"{winner} won")
-            self.resetGameBoard()
-            self.printStatus()
+            again = self.play_again()
 
             return
 
         # check draw
         res = self.boardIsFull()
         if res:
-            messagebox.Message("The game resulted in a draw")
-            self.updateGamesPlayed('tie')
-            messagebox.Message(message="The game tied")
-            self.printStatus()
-            self.resetGameBoard()
-            self.printStatus()
+            self.updateGamesPlayed('draw')
+
+            again = self.play_again()
 
 
         self.myTurn = not self.myTurn
@@ -222,6 +243,7 @@ class Game:
         if self.myTurn:
             self.con.send("quit".encode('utf-8'))
         self.root.destroy()
+        sys.exit()
 
     def start_game_window(self):
         mainloop()
