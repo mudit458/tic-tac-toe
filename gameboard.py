@@ -149,6 +149,34 @@ class Game:
         text += f"Number of ties: {self.ties_count}\nNumber of losses: {self.loss_count}"
         self.stats["text"] = text
         self.root.update()
+    # TODO::::::::
+    def play_again(self):
+        self.root.withdraw()
+        y = promptInput("Do you want to play again?")
+        y = y.lower()
+        if self.myTurn:
+            if y:
+                self.con.send("Play Again".encode('utf-8'))
+            else:
+                self.con.send("Fun Times")
+            response = self.con.recv(2048).decode('utf-8')
+        else:
+            response = self.con.recv(2048).decode('utf-8')
+            if y:
+                self.send("Play Again".encode('utf-8'))
+            else:
+                self.send("Fun Times".encode('utf-8'))
+        self.root.deiconify()
+        if y == 'y' and response == 'Play Again':
+            self.resetGameBoard()
+            return True
+        else:
+            for i in range(3):
+                for j in range(3):
+                    self.b[i][j].config(text = "*", state=DISABLED)
+            self.label["text"] = "Not in play"
+            self.root.update()
+            return False
 
     def click(self, row=-1, col=-1):
         self.xy = str(row) + " " + str(col)
