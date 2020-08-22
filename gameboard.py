@@ -1,7 +1,6 @@
 import threading
-from random import random
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 
 
 def promptInput(message):
@@ -23,6 +22,7 @@ def promptInput(message):
     button.pack()
     root.mainloop()
     return res
+
 
 
 class Game:
@@ -95,31 +95,26 @@ class Game:
             for j in range(3):
                 self.b[i][j]["text"] = ""
                 self.b[i][j]["state"] = NORMAL
-        self.last_player = ""
-        self.printStatus()
 
     def isWinner(self):
         # horizontal
-        for char in ("X", "O"):
-            rows = [0] * 3
-            cols = [0] * 3
-            for i in range(3):
-                for j in range(3):
-                    if self.b[i][j]["text"] == char:
-                        rows[i] += 1
-                        cols[j] += 1
-            if max(rows + cols) == 3:
-                return char
-            ldiag = 0
-            rdiag = 0
-            for i in range(3):
-                if self.b[i][i]["text"] == char:
-                    ldiag += 1
-                if self.b[i][3 - 1 - i]["text"] == char:
-                    rdiag += 1
-            if max(ldiag, rdiag) >= 3:
-                return char
-        return None
+        rows = [0] * 3
+        cols = [0] * 3
+        for i in range(3):
+            for j in range(3):
+                if self.b[i][j]["text"] == self.player_char:
+                    rows[i] += 1
+                    cols[j] += 1
+        if max(rows + cols) == 3:
+            return True
+        ldiag = 0
+        rdiag = 0
+        for i in range(3):
+            if self.b[i][i]["text"] == self.player_char:
+                ldiag += 1
+            if self.b[i][3 - 1 - i]["text"] == self.player_char:
+                rdiag += 1
+        return max(ldiag, rdiag) >= 3
 
     def enableAll(self):
         for i in range(3):
@@ -136,14 +131,12 @@ class Game:
         cnt = 0
         for i in range(3):
             for j in range(3):
-                if self.b[i][j]["text"] in ('X', 'O'):
+                if self.b[i][j]["text"] != '':
                     cnt += 1
-        if cnt == 9:
-            return True
-        return False
+        return cnt == 9
 
     def printStatus(self):
-        text = "Statistics\n"
+        text="Statistics\n"
         text += f"Name: {self.user_name}\n Last Player: {self.last_player}\n"
         text += f"Number of games played: {self.games_played}\nWins: {self.wins}\n"
         text += f"Number of ties: {self.ties_count}\nNumber of losses: {self.loss_count}"
@@ -178,16 +171,16 @@ class Game:
             return False
 
     def click(self, row=-1, col=-1):
+        self.b[row][col].config(state=DISABLED, disabledforeground=self.colour[self.player_char])
         self.xy = str(row) + " " + str(col)
         self.disableAll()
         if self.myTurn:
-            self.b[row][col].config(state=DISABLED, disabledforeground=self.colour[self.player_char])
             self.b[row][col].config(text=self.player_char)
-            self.root.update()
             self.con.send(f"{row} {col}".encode('utf-8'))
             print("sent ", row, col)
         else:
             print("waiting for move")
+            other = ""
             if self.player_char == "X":
                 other = "O"
             else:
@@ -222,26 +215,17 @@ class Game:
 
             again = self.play_again()
 
+        #check draw
 
         self.myTurn = not self.myTurn
-
-        if self.myTurn:
-            self.label.config(text=f"{self.user_name}' Turn")
-            self.last_player = self.user_name
-        else:
-            self.label.config(text=f"{self.other_player}'s Turn")
-            self.last_player = self.other_player
-        self.printStatus()
-        self.root.update()
 
         if self.myTurn:
             self.enableAll()
         else:
             self.click()
 
+
     def close_window(self):
-        if self.myTurn:
-            self.con.send("quit".encode('utf-8'))
         self.root.destroy()
         sys.exit()
 
@@ -249,13 +233,7 @@ class Game:
         mainloop()
 
     def play(self):
-        if self.myTurn:
-            self.label["text"] = f"{self.user_name}' Turn"
-        else:
-            self.label["text"] = f"{self.other_player}'s Turn"
+        if not self.myTurn:
+            self.root.after(2000, self.click)
         self.start_game_window()
 
-
-if __name__ == "__main__":
-    cc = Game("X", True)
-    cc.play()
