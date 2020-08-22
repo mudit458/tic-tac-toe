@@ -3,13 +3,13 @@ import socket
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ip = promptInput("Enter Player 2 ip/name")
-    port = promptInput("Enter Player 2 port number")
-    port = int(port)
     try_again = True
     while try_again:
         try_again = False
         try:
+            ip = promptInput("Enter Player 2 ip/name")
+            port = promptInput("Enter Player 2 port number")
+            port = int(port)
             s.connect((ip, port))
             print("connection established")
 

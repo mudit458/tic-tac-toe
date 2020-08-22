@@ -1,3 +1,4 @@
+import threading
 from tkinter import *
 from tkinter import messagebox, simpledialog
 
@@ -12,7 +13,7 @@ def promptInput(message):
     def submit():
         nonlocal res
         res = ipbox.get()
-        if (res.strip() != ""):
+        if res.strip() != "":
             root.destroy()
 
     button = Button(text="Submit", command=submit)
@@ -45,7 +46,7 @@ class Game:
         for i in range(3):
             for j in range(3):
                 self.b[i].append(self.button(self.root))
-                self.b[i][j].config(command=lambda row=i, col=j: self.click(row, col))
+                self.b[i][j].config(text="", command=lambda row=i, col=j: self.click(row, col))
                 self.b[i][j].grid(row=i, column=j)
         self.label = Label(text="Chance", font=('arial', 20, 'bold'))
         self.label.grid(row=3, column=0, columnspan=3)
@@ -114,16 +115,12 @@ class Game:
         return max(ldiag, rdiag) >= 3
 
     def enableAll(self):
-        self.last_player = self.other_player
-        self.label["text"] = f"{self.user_name}'s Turn"
         for i in range(3):
             for j in range(3):
                 if self.b[i][j]["text"] == "":
                     self.b[i][j]["state"] = NORMAL
 
     def disableAll(self):
-        self.label["text"] = f"{self.other_player}'s Turn"
-        self.last_player = self.other_player
         for i in range(3):
             for j in range(3):
                 self.b[i][j]["state"] = DISABLED
@@ -132,7 +129,7 @@ class Game:
         cnt = 0
         for i in range(3):
             for j in range(3):
-                if self.b[i][j]["text"] == '':
+                if self.b[i][j]["text"] != '':
                     cnt += 1
         return cnt == 9
 
@@ -148,14 +145,19 @@ class Game:
         self.disableAll()
         if self.myTurn:
             self.b[row][col].config(text=self.player_char)
+            self.con.send(f"{row} {col}".encode('utf-8'))
+            print("sent ", row, col)
         else:
+            print("waiting for move")
             other = ""
             if self.player_char == "X":
                 other = "O"
             else:
                 other = "X"
             # get other player's move
+            print("waiting for other player to make a move")
             xy = self.con.recv(2048).decode('utf-8')
+            print("other player moved at", xy)
             row, col = map(int, xy.split())
             self.b[row][col].config(text=other)
         #check win
@@ -172,8 +174,14 @@ class Game:
     def close_window(self):
         self.root.destroy()
 
-    def play(self):
+    def start_game_window(self):
         self.root.mainloop()
+
+    def play(self):
+        threading.Thread(target=self.start_game_window).start()
+        print("this_part_still_runs after thread started")
+        if not self.myTurn:
+            self.click()
 
 
 if __name__ == "__main__":

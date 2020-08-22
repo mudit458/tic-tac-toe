@@ -26,6 +26,7 @@ try:
     # send my username
     c.send(game.user_name.encode('utf-8'))
     game.con = c
+    game.myTurn = False
     game.play()
 
 except socket.error as e:
