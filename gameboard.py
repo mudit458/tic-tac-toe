@@ -25,6 +25,7 @@ def promptInput(message):
     return res
 
 
+
 class Game:
     def __init__(self, pc):
         self.con = ""
