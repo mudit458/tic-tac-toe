@@ -7,21 +7,21 @@ from tkinter import messagebox
 def promptInput(message):
     res = ""
 
-    root = Tk()
-    label = Label(root, text=message)
-    ipbox = Entry(root)
+    ads = Tk()
+    label = Label(ads, text=message)
+    ipbox = Entry(ads)
 
     def submit():
         nonlocal res
         res = ipbox.get()
         if res.strip() != "":
-            root.destroy()
+            ads.destroy()
 
-    button = Button(text="Submit", command=submit)
+    button = Button(ads, text="Submit", command=submit)
     label.pack()
     ipbox.pack()
     button.pack()
-    root.mainloop()
+    ads.mainloop()
     return res
 
 
@@ -142,6 +142,40 @@ class Game:
             return True
         return False
 
+    def play_again(self):
+        yes = ''
+        self.root.withdraw()
+        while yes.strip().lower() not in ("y", "n"):
+            yes = promptInput("Do you want to play again??(y/n)")
+        print("i want to play again", yes)
+        if self.player_char == 'X':
+            # he is player 1
+            if yes == 'y':
+                self.con.send("Play Again".encode('utf-8'))
+                print("sent play again")
+            else:
+                self.con.send("Fun Times".encode('utf-8'))
+                print("sent funtimes")
+                print("recieved ")
+            response = self.con.recv(2048).decode('utf-8')
+        else:
+            # he is player 2 he waits for player 1's confirmation first
+            response = self.con.recv(2048).decond('utf-8')
+            if yes == 'y':
+                self.con.send("Play Again".encode('utf-8'))
+                print("sent play again")
+            else:
+                self.con.send("Fun Times".encode('utf-8'))
+        if yes == 'y' and response == "Play Again":
+            self.resetGameBoard()
+        else:
+            for i in range(3):
+                for j in range(3):
+                    self.b.config(text="*", state=DISABLED)
+            self.label["text"] = "Play Again Cancelled"
+        self.root.update()
+        self.root.deiconify()
+
     def printStatus(self):
         text = "Statistics\n"
         text += f"Name: {self.user_name}\n Last Player: {self.last_player}\n"
@@ -185,21 +219,17 @@ class Game:
             else:
                 winner = self.other_player
                 self.updateGamesPlayed('loss')
-            messagebox.Message(message=f"{winner} won")
-            self.resetGameBoard()
             self.printStatus()
-
+            self.play_again()
             return
 
         # check draw
         res = self.boardIsFull()
         if res:
-            messagebox.Message("The game resulted in a draw")
             self.updateGamesPlayed('tie')
             messagebox.Message(message="The game tied")
-            self.printStatus()
-            self.resetGameBoard()
-            self.printStatus()
+            self.play_again()
+            return
 
 
         self.myTurn = not self.myTurn
