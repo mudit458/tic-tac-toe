@@ -25,11 +25,13 @@ def promptInput(message):
 
 class Game:
     def __init__(self, pc):
+        self.con = ""
         self.user_name = ""
         while self.user_name == "":
             self.user_name = self.getName().strip()
+        self.myTurn = False
         self.other_player = ""
-        self.player_char = pc  # next_player to move
+        self.player_char = pc  # X/O
         self.games_played = 0
         self.ties_count = 0
         self.wins = 0
@@ -141,7 +143,11 @@ class Game:
 
     def click(self, row, col):
         self.b[row][col].config(text=self.player_char, state=DISABLED, disabledforeground=self.colour[self.player_char])
+        self.myTurn = False
         self.disableAll()
+        # send move to other
+
+        # wait for player 2 move
 
     def played(self, row, col, char):
         self.b[row][col].config(text=char, state=DISABLED, disabledforeground=self.colour[self.char])
