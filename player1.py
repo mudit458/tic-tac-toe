@@ -34,6 +34,7 @@ def main():
     game.other_player = op
     game.con = s
     game.myTurn = True
+    game.enableAll()
     game.play()
 
     # start game

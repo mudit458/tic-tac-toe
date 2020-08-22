@@ -30,6 +30,7 @@ class Game:
         while self.user_name == "":
             self.user_name = self.getName().strip()
         self.myTurn = False
+        self.xy = ""
         self.other_player = ""
         self.player_char = pc  # X/O
         self.games_played = 0
@@ -141,17 +142,32 @@ class Game:
         text += f"Number of games played: {self.games_played}\nWins: {self.wins}\n"
         text += f"Number of ties: {self.ties_count}\nNumber of losses: {self.loss_count}"
 
-    def click(self, row, col):
-        self.b[row][col].config(text=self.player_char, state=DISABLED, disabledforeground=self.colour[self.player_char])
-        self.myTurn = False
+    def click(self, row=-1, col=-1):
+        self.b[row][col].config(state=DISABLED, disabledforeground=self.colour[self.player_char])
+        self.xy = str(row) + " " + str(col)
         self.disableAll()
-        # send move to other
+        if self.myTurn:
+            self.b[row][col].config(text=self.player_char)
+        else:
+            other = ""
+            if self.player_char == "X":
+                other = "O"
+            else:
+                other = "X"
+            # get other player's move
+            xy = self.con.recv(2048).decode('utf-8')
+            row, col = map(int, xy.split())
+            self.b[row][col].config(text=other)
+        #check win
 
-        # wait for player 2 move
+        #check draw
 
-    def played(self, row, col, char):
-        self.b[row][col].config(text=char, state=DISABLED, disabledforeground=self.colour[self.char])
-        self.disableAll()
+        myTurn = not self.myTurn
+
+        if myTurn:
+            self.enableAll()
+            self.click()
+
 
     def close_window(self):
         self.root.destroy()
