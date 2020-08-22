@@ -31,6 +31,7 @@ class Game:
         self.user_name = ""
         while self.user_name == "":
             self.user_name = self.getName().strip()
+            # self.user_name = "abc"
         self.myTurn = False
         self.xy = ""
         self.other_player = ""
@@ -139,6 +140,35 @@ class Game:
         text += f"Name: {self.user_name}\n Last Player: {self.last_player}\n"
         text += f"Number of games played: {self.games_played}\nWins: {self.wins}\n"
         text += f"Number of ties: {self.ties_count}\nNumber of losses: {self.loss_count}"
+        self.stats["text"] = text
+        self.root.update()
+    def play_again(self):
+        self.root.withdraw()
+        y = promptInput("Do you want to play again?")
+        y = y.lower()
+        if self.myTurn:
+            if y:
+                self.con.send("Play Again".encode('utf-8'))
+            else:
+                self.con.send("Fun Times")
+            response = self.con.recv(2048).decode('utf-8')
+        else:
+            response = self.con.recv(2048).decode('utf-8')
+            if y:
+                self.send("Play Again".encode('utf-8'))
+            else:
+                self.send("Fun Times".encode('utf-8'))
+        self.root.deiconify()
+        if y == 'y' and response == 'Play Again':
+            self.resetGameBoard()
+            return True
+        else:
+            for i in range(3):
+                for j in range(3):
+                    self.b[i][j].config(text = "*", state=DISABLED)
+            self.label["text"] = "Not in play"
+            self.root.update()
+            return False
 
     def click(self, row=-1, col=-1):
         self.b[row][col].config(state=DISABLED, disabledforeground=self.colour[self.player_char])
@@ -158,10 +188,32 @@ class Game:
             # get other player's move
             print("waiting for other player to make a move")
             xy = self.con.recv(2048).decode('utf-8')
+            if xy == "quit":
+                print("other Player Quit")
+                self.close_window()
             print("other player moved at", xy)
             row, col = map(int, xy.split())
             self.b[row][col].config(text=other)
-        #check win
+            self.b[row][col].config(state=DISABLED, disabledforeground=self.colour[other])
+        # check win
+        res = self.isWinner()
+        if res:
+            if res == self.player_char:
+                winner = self.user_name
+                self.updateGamesPlayed('win')
+            else:
+                winner = self.other_player
+                self.updateGamesPlayed('loss')
+            again = self.play_again()
+
+            return
+
+        # check draw
+        res = self.boardIsFull()
+        if res:
+            self.updateGamesPlayed('draw')
+
+            again = self.play_again()
 
         #check draw
 
@@ -175,6 +227,7 @@ class Game:
 
     def close_window(self):
         self.root.destroy()
+        sys.exit()
 
     def start_game_window(self):
         mainloop()

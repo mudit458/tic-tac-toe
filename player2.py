@@ -18,6 +18,7 @@ try:
 
     game = Game('O')
     game.disableAll()
+    # game.user_name = 'p2'
 
     # receive player 1 username
     other_name = c.recv(2048).decode('utf-8')

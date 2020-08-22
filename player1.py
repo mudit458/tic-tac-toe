@@ -8,7 +8,9 @@ def main():
         try_again = False
         try:
             ip = promptInput("Enter Player 2 ip/name")
+            # ip = "192.168.43.143"
             port = promptInput("Enter Player 2 port number")
+            # port = 5555
             port = int(port)
             s.connect((ip, port))
             print("connection established")
@@ -25,6 +27,7 @@ def main():
     # connected with socket s
 
     game = Game('X')
+    # game.user_name = 'p1'
     game.disableAll()
     # send user name to player 2
     s.send(game.user_name.encode('utf-8'))
