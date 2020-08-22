@@ -233,7 +233,3 @@ class Game:
             self.label["text"] = f"{self.other_player}'s Turn"
         self.start_game_window()
 
-
-if __name__ == "__main__":
-    cc = Game("X", True)
-    cc.play()
