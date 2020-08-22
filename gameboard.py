@@ -164,10 +164,11 @@ class Game:
 
         #check draw
 
-        myTurn = not self.myTurn
+        self.myTurn = not self.myTurn
 
-        if myTurn:
+        if self.myTurn:
             self.enableAll()
+        else:
             self.click()
 
 
@@ -175,13 +176,12 @@ class Game:
         self.root.destroy()
 
     def start_game_window(self):
-        self.root.mainloop()
+        mainloop()
 
     def play(self):
-        threading.Thread(target=self.start_game_window).start()
-        print("this_part_still_runs after thread started")
         if not self.myTurn:
-            self.click()
+            self.root.after(2000, self.click)
+        self.start_game_window()
 
 
 if __name__ == "__main__":
