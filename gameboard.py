@@ -152,19 +152,18 @@ class Game:
 
     def play_again(self):
         self.root.withdraw()
-        y = input("Do you want to play again?")
-        y = y.lower()
-        print('play agian', y)
+        y = ''
+        while y not in ('y', 'n'):
+            # y = promptInput("Do you want to play again?")
+            y = input("Do you want to play again?")
+            y = y.lower()
+
         if self.myTurn:
             if y == 'y':
                 self.con.send("Play Again".encode('utf-8'))
-                print('sent play again')
             else:
                 self.con.send("Fun Times")
-                print('sent fun times')
-            print('waiting for response')
             response = self.con.recv(2048).decode('utf-8')
-            print('recieved', response)
         else:
             response = self.con.recv(2048).decode('utf-8')
             if y == 'y':
