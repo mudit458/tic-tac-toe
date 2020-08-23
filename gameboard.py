@@ -260,4 +260,3 @@ class Game:
         else:
             self.label["text"] = f"{self.other_player}'s Turn"
         self.start_game_window()
-
