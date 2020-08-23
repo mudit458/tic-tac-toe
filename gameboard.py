@@ -17,7 +17,7 @@ def promptInput(message):
         if res.strip() != "":
             root.destroy()
 
-    button = Button(text="Submit", command=submit)
+    button = Button(root, text="Submit", command=submit)
     label.pack()
     ipbox.pack()
     button.pack()
@@ -30,8 +30,8 @@ class Game:
         self.con = ""
         self.user_name = ""
         while self.user_name == "":
-            # self.user_name = self.getName().strip()
-            self.user_name = "abc"
+            self.user_name = self.getName().strip()
+            # self.user_name = "abc"
         self.myTurn = False
         self.xy = ""
         self.other_player = ""
@@ -149,34 +149,37 @@ class Game:
         text += f"Number of ties: {self.ties_count}\nNumber of losses: {self.loss_count}"
         self.stats["text"] = text
         self.root.update()
-    # TODO::::::::
+
     def play_again(self):
         self.root.withdraw()
-        y = promptInput("Do you want to play again?")
+        y = input("Do you want to play again?")
         y = y.lower()
+        print('play agian', y)
         if self.myTurn:
-            if y:
+            if y == 'y':
                 self.con.send("Play Again".encode('utf-8'))
+                print('sent play again')
             else:
                 self.con.send("Fun Times")
+                print('sent fun times')
+            print('waiting for response')
             response = self.con.recv(2048).decode('utf-8')
+            print('recieved', response)
         else:
             response = self.con.recv(2048).decode('utf-8')
-            if y:
-                self.send("Play Again".encode('utf-8'))
+            if y == 'y':
+                self.con.send("Play Again".encode('utf-8'))
             else:
-                self.send("Fun Times".encode('utf-8'))
-        self.root.deiconify()
+                self.con.send("Fun Times".encode('utf-8'))
         if y == 'y' and response == 'Play Again':
             self.resetGameBoard()
-            return True
         else:
             for i in range(3):
                 for j in range(3):
-                    self.b[i][j].config(text = "*", state=DISABLED)
+                    self.b[i][j].config(text="*", state=DISABLED, bg='grey', disabledforeground='red')
             self.label["text"] = "Not in play"
             self.root.update()
-            return False
+        self.root.deiconify()
 
     def click(self, row=-1, col=-1):
         self.xy = str(row) + " " + str(col)
@@ -213,9 +216,8 @@ class Game:
             else:
                 winner = self.other_player
                 self.updateGamesPlayed('loss')
-            messagebox.Message(message=f"{winner} won")
-            self.resetGameBoard()
             self.printStatus()
+            self.play_again()
 
             return
 
@@ -228,7 +230,8 @@ class Game:
             self.printStatus()
             self.resetGameBoard()
             self.printStatus()
-
+            self.play_again()
+            return
 
         self.myTurn = not self.myTurn
 

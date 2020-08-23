@@ -1,6 +1,7 @@
 from gameboard import *
 import socket
 
+
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try_again = True
@@ -19,7 +20,7 @@ def main():
             print("Connection Failed")
             print("Error: ", e)
             again = promptInput("Would you like to try again? (y/n)")
-            if again.lower() == 'y':
+            if again.lower() != 'n':
                 try_again = True
             else:
                 sys.exit()
@@ -41,7 +42,6 @@ def main():
     game.play()
 
     # start game
-
 
 
 if __name__ == "__main__":
