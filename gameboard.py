@@ -7,21 +7,21 @@ from tkinter import messagebox
 def promptInput(message):
     res = ""
 
-    root = Tk()
-    label = Label(root, text=message)
-    ipbox = Entry(root)
+    win = Tk()
+    label = Label(win, text=message)
+    ipbox = Entry(win)
 
     def submit():
         nonlocal res
         res = ipbox.get()
         if res.strip() != "":
-            root.destroy()
+            win.destroy()
 
-    button = Button(root, text="Submit", command=submit)
+    button = Button(win, text="Submit", command=submit)
     label.pack()
     ipbox.pack()
     button.pack()
-    root.mainloop()
+    win.mainloop()
     return res
 
 
@@ -30,7 +30,7 @@ class Game:
         self.con = ""
         self.user_name = ""
         while self.user_name == "":
-            self.user_name = self.getName().strip()
+            self.user_name = promptInput("Enter Username")
             # self.user_name = "abc"
         self.myTurn = False
         self.xy = ""
@@ -56,24 +56,6 @@ class Game:
         self.close.grid(row=4, column=0, columnspan=3)
         self.stats = Label(self.root, text="Statistics", font=('arial', 20, 'bold'))
         self.stats.grid(row=0, column=3, rowspan=4, columnspan=4)
-
-    def getName(self):
-        popup = Tk()
-        lb = Label(popup, text="Enter Name: ")
-        ip = Entry(popup)
-        name = ""
-        lb.pack()
-        ip.pack()
-
-        def submitName():
-            nonlocal name
-            name = ip.get()
-            popup.destroy()
-
-        sb = Button(popup, text="submit", command=submitName)
-        sb.pack()
-        popup.mainloop()
-        return name
 
     @staticmethod
     def button(frame):  # Function to define a button
@@ -152,25 +134,23 @@ class Game:
 
     def play_again(self):
         self.root.withdraw()
-        y = ''
-        while y not in ('y', 'n'):
-            # y = promptInput("Do you want to play again?")
-            y = input("Do you want to play again?")
-            y = y.lower()
+        yes = messagebox.askyesno("Again?", "Do you want to play again???")
+        print(yes)
+        print('out of loop')
 
         if self.myTurn:
-            if y == 'y':
+            if yes:
                 self.con.send("Play Again".encode('utf-8'))
             else:
                 self.con.send("Fun Times")
             response = self.con.recv(2048).decode('utf-8')
         else:
             response = self.con.recv(2048).decode('utf-8')
-            if y == 'y':
+            if yes:
                 self.con.send("Play Again".encode('utf-8'))
             else:
                 self.con.send("Fun Times".encode('utf-8'))
-        if y == 'y' and response == 'Play Again':
+        if yes and response == 'Play Again':
             self.resetGameBoard()
         else:
             for i in range(3):
@@ -236,10 +216,10 @@ class Game:
 
         if self.myTurn:
             self.label.config(text=f"{self.user_name}' Turn")
-            self.last_player = self.user_name
+            self.last_player = self.other_player
         else:
             self.label.config(text=f"{self.other_player}'s Turn")
-            self.last_player = self.other_player
+            self.last_player = self.user_name
         self.printStatus()
         self.root.update()
 
@@ -257,6 +237,7 @@ class Game:
         mainloop()
 
     def play(self):
+        self.printStatus()
         if self.myTurn:
             self.label["text"] = f"{self.user_name}' Turn"
         else:
