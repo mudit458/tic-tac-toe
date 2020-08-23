@@ -1,5 +1,5 @@
 # tic-tac-toe
-tic-tac-toe multiplayer using python-tkintker
+tic-tac-toe multiplayer using python-tkintker and sockets(socket) programming
 
 # Run
 ```
